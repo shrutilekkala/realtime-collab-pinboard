@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: pinboard-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # Single process, single instance — the WebSocket connection manager
+    # (app/ws_manager.py) keeps connected clients in an in-memory dict per
+    # process. Do not add gunicorn workers or enable multiple instances/
+    # autoscaling for this service, or real-time sync will silently break
+    # for clients connected to a different process/instance than the one
+    # handling a given REST request.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
